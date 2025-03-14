@@ -1,0 +1,35 @@
+SubDir HAIKU_TOP src add-ons translators heic ;
+
+SubDirSysHdrs [ FDirName $(SUBDIR) $(DOTDOT) raw ] ;
+    # For any additional headers you might need
+
+SubDirHdrs [ FDirName $(SUBDIR) $(DOTDOT) shared ] ;
+    # For BaseTranslator.h and friends
+
+AddResources HEICTranslator : HEICTranslator.rdef ;
+
+local architectureObject ;
+for architectureObject in [ MultiArchSubDirSetup ] {
+    on $(architectureObject) {
+        UseBuildFeatureHeaders libheif ;
+
+        Translator [ MultiArchDefaultGristFiles HEICTranslator ] :
+            HEICTranslator.cpp
+            : be translation
+            [ MultiArchDefaultGristFiles libtranslatorsutils.a ]
+            [ BuildFeatureAttribute libheif : library ]
+            [ TargetLibstdc++ ] localestub
+            : true
+            ;
+
+        Includes [ FGristFiles HEICTranslator.cpp ]
+            : [ BuildFeatureAttribute libheif : headers ] ;
+    }
+}
+
+DoCatalogs HEICTranslator :
+    x-vnd.Haiku-HEICTranslator
+    :
+    HEICTranslator.h
+    HEICTranslator.cpp
+;
