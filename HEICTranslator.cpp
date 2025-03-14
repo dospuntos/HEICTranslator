@@ -35,30 +35,43 @@ status_t HEICTranslator::DerivedIdentify(BPositionIO* inSource,
 }
 
 status_t HEICTranslator::DerivedTranslate(BPositionIO* inSource,
-                                          const translator_info* inInfo,
-                                          BMessage* ioExtension,
-                                          uint32 outType,
-                                          BPositionIO* outDestination) {
-    // Load the HEIC image into a BBitmap
-    BBitmap* bitmap = LoadHeic(inSource);
-    if (!bitmap) {
-        return B_ERROR;
-    }
+    const translator_info* inInfo,
+    BMessage* ioExtension,
+    uint32 outType,
+    BPositionIO* outDestination) {
+// Load the HEIC image into a BBitmap
+BBitmap* bitmap = LoadHeic(inSource);
+if (!bitmap) {
+return B_ERROR;
+}
 
-    // Create a TranslatorBitmap from the BBitmap
-    TranslatorBitmap translatorBitmap;
-    translatorBitmap.bits = (void*)bitmap->Bits();
-    translatorBitmap.rowBytes = bitmap->BytesPerRow();
-    translatorBitmap.colors = B_RGBA32;
-    translatorBitmap.bounds = bitmap->Bounds();
-    translatorBitmap.dataSize = bitmap->BitsLength();
+// Write the bitmap data to the output stream
+status_t result = B_OK;
 
-    // Write the bitmap data to the output stream
-    status_t result = BTranslator::Translate(&translatorBitmap, nullptr, 0, outDestination, outType, 0);
+// Write the bitmap header
+TranslatorBitmap header;
+header.magic = B_TRANSLATOR_BITMAP;
+header.bounds = bitmap->Bounds();
+header.rowBytes = bitmap->BytesPerRow();
+header.colors = (color_space)bitmap->ColorSpace();
+header.dataSize = bitmap->BitsLength();
 
-    // Clean up
-    delete bitmap;
-    return result;
+ssize_t written = outDestination->Write(&header, sizeof(header));
+if (written != sizeof(header)) {
+result = B_ERROR;
+}
+
+// Write the bitmap data
+if (result == B_OK) {
+written = outDestination->Write(bitmap->Bits(), bitmap->BitsLength());
+if (written != bitmap->BitsLength()) {
+result = B_ERROR;
+}
+}
+
+// Clean up
+delete bitmap;
+return result;
 }
 
 status_t HEICTranslator::GetConfigurationMessage(BMessage* ioExtension) {
