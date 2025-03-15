@@ -1,7 +1,7 @@
 # Compiler and flags
 CC = g++
-CFLAGS = -Wall -O2 -I/boot/system/develop/headers/private/interface -I/boot/system/develop/headers/libheif
-LDFLAGS = -lbe -ltranslation -L/boot/system/lib -lheif
+CFLAGS = -Wall -O2 -I/boot/system/develop/headers/private/interface
+LDFLAGS = -lbe -ltranslation
 
 # Source and output files
 SRC = HEICTranslator.cpp

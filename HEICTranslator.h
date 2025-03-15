@@ -3,9 +3,7 @@
 
 #include <Translator.h>
 #include <TranslatorFormats.h>
-#include <Bitmap.h>
 #include <DataIO.h>
-#include <libheif/heif.h>
 
 class HEICTranslator : public BTranslator {
 public:
@@ -25,13 +23,6 @@ public:
                                       BPositionIO* outDestination);
 
     virtual status_t GetConfigurationMessage(BMessage* ioExtension);
-
-    // Optional: Implement these if needed
-    virtual status_t AcquireSettings(BMessage* ioExtension);
-    virtual BView* MakeConfigurationView(BMessage* ioExtension);
-
-private:
-    BBitmap* LoadHeic(BPositionIO* inSource);
 };
 
 #endif // HEIC_TRANSLATOR_H
