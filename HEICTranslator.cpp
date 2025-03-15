@@ -35,48 +35,58 @@ status_t HEICTranslator::DerivedIdentify(BPositionIO* inSource,
 }
 
 status_t HEICTranslator::DerivedTranslate(BPositionIO* inSource,
-    const translator_info* inInfo,
-    BMessage* ioExtension,
-    uint32 outType,
-    BPositionIO* outDestination) {
-// Load the HEIC image into a BBitmap
-BBitmap* bitmap = LoadHeic(inSource);
-if (!bitmap) {
-return B_ERROR;
-}
+                                          const translator_info* inInfo,
+                                          BMessage* ioExtension,
+                                          uint32 outType,
+                                          BPositionIO* outDestination) {
+    // Load the HEIC image into a BBitmap
+    BBitmap* bitmap = LoadHeic(inSource);
+    if (!bitmap) {
+        return B_ERROR;
+    }
 
-// Write the bitmap data to the output stream
-status_t result = B_OK;
+    // Write the bitmap data to the output stream
+    status_t result = B_OK;
 
-// Write the bitmap header
-TranslatorBitmap header;
-header.magic = B_TRANSLATOR_BITMAP;
-header.bounds = bitmap->Bounds();
-header.rowBytes = bitmap->BytesPerRow();
-header.colors = (color_space)bitmap->ColorSpace();
-header.dataSize = bitmap->BitsLength();
+    // Write the bitmap header
+    TranslatorBitmap header;
+    header.magic = B_TRANSLATOR_BITMAP;
+    header.bounds = bitmap->Bounds();
+    header.rowBytes = bitmap->BytesPerRow();
+    header.colors = (color_space)bitmap->ColorSpace();
+    header.dataSize = bitmap->BitsLength();
 
-ssize_t written = outDestination->Write(&header, sizeof(header));
-if (written != sizeof(header)) {
-result = B_ERROR;
-}
+    ssize_t written = outDestination->Write(&header, sizeof(header));
+    if (written != sizeof(header)) {
+        result = B_ERROR;
+    }
 
-// Write the bitmap data
-if (result == B_OK) {
-written = outDestination->Write(bitmap->Bits(), bitmap->BitsLength());
-if (written != bitmap->BitsLength()) {
-result = B_ERROR;
-}
-}
+    // Write the bitmap data
+    if (result == B_OK) {
+        written = outDestination->Write(bitmap->Bits(), bitmap->BitsLength());
+        if (written != bitmap->BitsLength()) {
+            result = B_ERROR;
+        }
+    }
 
-// Clean up
-delete bitmap;
-return result;
+    // Clean up
+    delete bitmap;
+    return result;
 }
 
 status_t HEICTranslator::GetConfigurationMessage(BMessage* ioExtension) {
     // No special configuration needed
     return B_OK;
+}
+
+status_t HEICTranslator::AcquireSettings(BMessage* ioExtension) {
+    // No settings to acquire
+    return B_OK;
+}
+
+BView* HEICTranslator::MakeConfigurationView(BMessage* ioExtension) {
+    // No configuration view
+    return nullptr;
 }
 
 BBitmap* HEICTranslator::LoadHeic(BPositionIO* inSource) {

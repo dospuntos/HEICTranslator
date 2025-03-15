@@ -2,7 +2,6 @@
 #define HEIC_TRANSLATOR_H
 
 #include <Translator.h>
-#include <TranslatorAddOn.h>
 #include <TranslatorFormats.h>
 #include <Bitmap.h>
 #include <DataIO.h>
@@ -26,6 +25,10 @@ public:
                                       BPositionIO* outDestination);
 
     virtual status_t GetConfigurationMessage(BMessage* ioExtension);
+
+    // Optional: Implement these if needed
+    virtual status_t AcquireSettings(BMessage* ioExtension);
+    virtual BView* MakeConfigurationView(BMessage* ioExtension);
 
 private:
     BBitmap* LoadHeic(BPositionIO* inSource);
