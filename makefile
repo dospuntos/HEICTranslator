@@ -7,7 +7,7 @@
 ## Application Specific Settings ---------------------------------------------
 
 # specify the name of the binary
-NAME=../HEICTranslator
+NAME=HEICTranslator
 
 # specify the type of binary
 #	APP:	Application
@@ -138,6 +138,8 @@ APP_VERSION =
 #	~/add-ons/kernel/drivers/dev/video/usb, so that your driver will appear at
 #	/dev/video/usb when loaded. Default is "misc".
 DRIVER_PATH =
+
+INSTALL_DIR = /boot/home/config/non-packaged/add-ons/Translators/
 
 ## include the makefile-engine
 DEVEL_DIRECTORY := \

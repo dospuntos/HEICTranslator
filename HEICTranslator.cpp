@@ -28,9 +28,9 @@
 
 
 // Translator info
-char translatorName[] = "HEIC Images";
+char translatorName[] = "HEIC images";
 char translatorInfo[] = "By Johan Wagenheim <johan@dospuntos.no>";
-int32 translatorVersion = 205;
+int32 translatorVersion = 100;
 
 translation_format inputFormats[] =
 {
