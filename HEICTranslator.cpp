@@ -10,18 +10,17 @@
 
 
 // Includes
-#include <string.h>
-#include <TranslatorAddOn.h>
-#include <TranslatorFormats.h>
+#include <Bitmap.h>
 #include <DataIO.h>
+#include <File.h>
+#include <FindDirectory.h>
+#include <Path.h>
 #include <Screen.h>
 #include <SupportKit.h>
+#include <TranslatorAddOn.h>
+#include <TranslatorFormats.h>
 #include <libheif/heif.h>
-#include <Alert.h>
-#include <Path.h>
-#include <File.h>
-#include <Bitmap.h>
-#include <FindDirectory.h>
+#include <string.h>
 
 
 // Defines
