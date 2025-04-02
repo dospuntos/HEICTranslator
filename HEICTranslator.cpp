@@ -29,9 +29,9 @@
 
 
 // Translator info
-char translatorName[] = "HEICTranslator";
+char translatorName[] = "HEIC Images";
 char translatorInfo[] = "By Johan Wagenheim <johan@dospuntos.no>";
-int32 translatorVersion = 201;
+int32 translatorVersion = 205;
 
 translation_format inputFormats[] =
 {
@@ -80,67 +80,6 @@ Identify(
 	return B_NO_TRANSLATOR;
 }
 
-
-static BBitmap *LoadHeic(const char *path)
-{
-	FILE *f = fopen(path, "rb");
-	if (!f)
-	{
-		printf("Error opening %s\n", path);
-		return nullptr;
-	}
-
-	uint8_t buffer[12];
-	fread(buffer, 12, 1, f);
-	fclose(f);
-	printf("MIME = %s\n", heif_get_file_mime_type(buffer, 12));
-
-
-	heif_context* ctx = heif_context_alloc();
-	heif_context_read_from_file(ctx, path, nullptr);
-
-	heif_image_handle* handle;
-	heif_context_get_primary_image_handle(ctx, &handle);
-
-	heif_image* img;
-	heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_RGBA, nullptr);
-
-	int stride;
-	const uint8_t* data = heif_image_get_plane_readonly(img, heif_channel_interleaved, &stride);
-	int width = heif_image_get_primary_width(img);
-	int height = heif_image_get_primary_height(img);
-
-	BBitmap *bitmap = new BBitmap(BRect(0, 0, width-1, height-1), B_RGBA32);
-	bitmap->Lock();
-	uint8 *dest = (uint8 *)bitmap->Bits();
-
-	const uint8 *src = data;
-	for (int y=0; y < height; y++)
-	{
-		for (int x=0; x<width; x++)
-		{
-			uint8 r=*src++;
-			uint8 g=*src++;
-			uint8 b=*src++;
-			uint8 a=*src++;
-			*dest++ = b;
-			*dest++ = g;
-			*dest++ = r;
-			*dest++ = a;
-		}
-		dest += stride-(width*4);
-	}
-
-	bitmap->Unlock();
-
-	heif_image_release(img);
-	heif_image_handle_release(handle);
-	heif_context_free(ctx);
-
-	return bitmap;
-}
-
-
 status_t
 Translate(
 	BPositionIO *inSource,
@@ -161,38 +100,71 @@ Translate(
 	if (outFormat != B_TRANSLATOR_BITMAP)
 		return B_NO_TRANSLATOR;
 
-	// Create a temporary file to store the input
-	BPath tempPath;
-	if (find_directory(B_SYSTEM_TEMP_DIRECTORY, &tempPath) != B_OK)
-		return B_ERROR;
-	tempPath.Append("temp.heic");
-
-	BFile tempFile(tempPath.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
-	status_t status = tempFile.InitCheck();
-	if (status != B_OK) {
-		printf("Error with create file (%s) - %s\n", tempPath.Path(), strerror(status));
-		return B_ERROR;
-	}
-
+	// Read input into memory
 	size_t fileSize = inSource->Seek(0, SEEK_END);
 	inSource->Seek(0, SEEK_SET);
-	char *buffer = new char[fileSize];
+	uint8_t *buffer = new uint8_t[fileSize];
 	if (inSource->Read(buffer, fileSize) != fileSize)
 	{
 		delete[] buffer;
 		return B_ERROR;
 	}
 
-	tempFile.Write(buffer, fileSize);
-		tempFile.Flush();
-		delete[] buffer;
+	// Load HEIC image from memory
+	heif_context* ctx = heif_context_alloc();
+	heif_context_read_from_memory_without_copy(ctx, buffer, fileSize, nullptr);
 
-	tempFile.Unset();
+	heif_image_handle* handle;
+	heif_context_get_primary_image_handle(ctx, &handle);
+
+	heif_image* img;
+	heif_decode_image(handle, &img, heif_colorspace_RGB, heif_chroma_interleaved_RGBA, nullptr);
+
+	int width = heif_image_get_primary_width(img);
+	int height = heif_image_get_primary_height(img);
+	int stride;
+	const uint8_t* data = heif_image_get_plane_readonly(img, heif_channel_interleaved, &stride);
+
+	// Create Haiku bitmap
+	BBitmap *bitmap = new BBitmap(BRect(0, 0, width-1, height-1), B_RGBA32);
+	if (!bitmap->IsValid())
+	{
+		heif_image_release(img);
+		heif_image_handle_release(handle);
+		heif_context_free(ctx);
+		delete[] buffer;
+		return B_ERROR;
+	}
+
+	uint8 *dest = (uint8_t *)bitmap->Bits();
+
+	// Convert BGRA to RGBA
+	for (int y=0; y < height; y++)
+	{
+		const uint8 *src = data + y * stride;
+		for (int x=0; x<width; x++)
+		{
+			uint8 r=*src++;
+			uint8 g=*src++;
+			uint8 b=*src++;
+			uint8 a=*src++;
+			*dest++ = b;
+			*dest++ = g;
+			*dest++ = r;
+			*dest++ = a;
+		}
+		dest += stride-(width*4);
+	}
 
 	// Load HEIC image
-	BBitmap *bitmap = LoadHeic(tempPath.Path());
+/*	BBitmap *bitmap = LoadHeic(tempPath.Path());
 	if (!bitmap)
-		return B_ERROR;
+		return B_ERROR; */
+
+	heif_image_release(img);
+	heif_image_handle_release(handle);
+	heif_context_free(ctx);
+	delete[] buffer;
 
 	// Prepare TranslatorBitmap header
 	TranslatorBitmap bmp;
