@@ -138,9 +138,9 @@ Translate(
 	uint8 *dest = (uint8_t *)bitmap->Bits();
 
 	// Convert BGRA to RGBA
+	const uint8 *src = data;
 	for (int y=0; y < height; y++)
 	{
-		const uint8 *src = data + y * stride;
 		for (int x=0; x<width; x++)
 		{
 			uint8 r=*src++;
@@ -152,13 +152,8 @@ Translate(
 			*dest++ = r;
 			*dest++ = a;
 		}
-		dest += stride-(width*4);
+		src += stride - (width *4);
 	}
-
-	// Load HEIC image
-/*	BBitmap *bitmap = LoadHeic(tempPath.Path());
-	if (!bitmap)
-		return B_ERROR; */
 
 	heif_image_release(img);
 	heif_image_handle_release(handle);
