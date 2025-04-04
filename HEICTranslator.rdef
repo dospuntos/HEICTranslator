@@ -1,0 +1,13 @@
+resource app_signature "application/x-vnd.Haiku-HEICTranslator";
+
+resource app_version {
+	major  = 0,
+	middle = 1,
+	minor  = 0,
+
+	variety = B_APPV_FINAL,
+	internal = 0,
+
+	short_info = "0.1.0",
+	long_info  = "Haiku HEICTranslator Add-Ons"
+};

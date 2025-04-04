@@ -14,7 +14,7 @@ NAME=HEICTranslator
 #	SHARED:	Shared library or add-on
 #	STATIC:	Static library archive
 #	DRIVER: Kernel Driver
-TYPE=SHARED
+TYPE=APP
 
 # 	if you plan to use localization features
 # 	specify the application MIME siganture
@@ -34,11 +34,16 @@ APP_MIME_SIG=
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS=HEICTranslator.cpp
+SRCS = HEICTranslator.cpp 	\
+	   ConfigView.cpp 		\
+	   HEICMain.cpp			\
+	   shared/BaseTranslator.cpp \
+	   shared/TranslatorSettings.cpp \
+	   shared/TranslatorWindow.cpp
 
 #	specify the resource definition files to use
 #	full path or a relative path to the resource file can be used.
-RDEFS=
+RDEFS=HEICTranslator.rdef
 
 #	specify the resource files to use.
 #	full path or a relative path to the resource file can be used.
@@ -66,7 +71,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS=be heif translation shared
+LIBS=be heif translation localestub $(STDCPPLIBS)
 
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
@@ -84,7 +89,7 @@ SYSTEM_INCLUDE_PATHS =
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
 #	source file directories are automatically included
-LOCAL_INCLUDE_PATHS =
+LOCAL_INCLUDE_PATHS = shared
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL

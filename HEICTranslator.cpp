@@ -1,5 +1,5 @@
 /*
- *  HEICTranslator.cpp 2.0.1 (March 31st, 2025)
+ *  HEICTranslator.cpp 0.1.0 (March 31st, 2025)
  *
  *  Translator add-on for HEIC images
  *  Written by Johan Wagenheim <johan@dospuntos.no>
@@ -11,6 +11,7 @@
 
 // Includes
 #include <Bitmap.h>
+#include <Catalog.h>
 #include <DataIO.h>
 #include <File.h>
 #include <FindDirectory.h>
@@ -21,32 +22,67 @@
 #include <TranslatorFormats.h>
 #include <libheif/heif.h>
 #include <string.h>
+#include "HEICTranslator.h"
+#include "ConfigView.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "HEICTranslator"
 
 
-// Defines
-#define HEIC_FORMAT 'HEIC'
-
-
-// Translator info
-char translatorName[] = "HEIC images";
-char translatorInfo[] = "By Johan Wagenheim <johan@dospuntos.no>";
-int32 translatorVersion = 100;
-
-translation_format inputFormats[] =
-{
-	{ HEIC_FORMAT, B_TRANSLATOR_BITMAP, 0.9, 0.8, "image/heic", "HEIC Image" },
-	{ 0, 0, 0.0, 0.0, "", "" }
+// The input formats that this translator supports.
+static const translation_format sInputFormats[] = {
+	{
+		HEIC_IMAGE_FORMAT,
+		B_TRANSLATOR_BITMAP,
+		1,
+		1,
+		"image/heic",
+		"HEIC"
+	}
 };
 
-translation_format outputFormats[] =
-{
-	{ B_TRANSLATOR_BITMAP, B_TRANSLATOR_BITMAP, 0.3, 0.5, "image/x-be-bitmap", "Be bitmap" },
-	{ 0, 0, 0.0, 0.0, "", "" }
+// The output formats that this translator supports.
+static const translation_format sOutputFormats[] = {
+	{
+		B_TRANSLATOR_BITMAP,
+		B_TRANSLATOR_BITMAP,
+		1,
+		1,
+		"image/x-be-bitmap",
+		"Be Bitmap Format (HEICTranslator)"
+	},
 };
+
+// Default settings for the Translator
+static const TranSetting sDefaultSettings[] = {
+	{B_TRANSLATOR_EXT_HEADER_ONLY, TRAN_SETTING_BOOL, false},
+	{B_TRANSLATOR_EXT_DATA_ONLY, TRAN_SETTING_BOOL, false}
+};
+
+const uint32 kNumInputFormats = sizeof(sInputFormats) / sizeof(translation_format);
+const uint32 kNumOutputFormats = sizeof(sOutputFormats) / sizeof(translation_format);
+const uint32 kNumDefaultSettings = sizeof(sDefaultSettings) / sizeof(TranSetting);
+
+HEICTranslator::HEICTranslator()
+		: BaseTranslator(B_TRANSLATE("HEIC images"),
+				B_TRANSLATE("HEIC image translator"),
+				HEIC_TRANSLATOR_VERSION,
+				sInputFormats, kNumInputFormats,
+				sOutputFormats, kNumOutputFormats,
+				"HEICTranslator_Settings",
+				sDefaultSettings, kNumDefaultSettings,
+				B_TRANSLATOR_BITMAP, HEIC_IMAGE_FORMAT)
+{
+}
+
+
+HEICTranslator::~HEICTranslator()
+{
+}
 
 
 status_t
-Identify(
+HEICTranslator::DerivedIdentify(
 	BPositionIO *inSource,
 	const translation_format *inFormat,
 	BMessage * /*ioExtension*/,
@@ -65,7 +101,7 @@ Identify(
 
 	// HEIC files start with ftypheic or ftyphevc
 	if (memcmp(magic + 4, "ftypheic", 8) == 0 || memcmp(magic + 4, "ftyphevc", 8) == 0) {
-		inFormat = &inputFormats[0];
+		inFormat = &sInputFormats[0];
 		outInfo->type = inFormat->type;
 		outInfo->group = inFormat->group;
 		outInfo->quality = inFormat->quality;
@@ -79,31 +115,32 @@ Identify(
 	return B_NO_TRANSLATOR;
 }
 
+
 status_t
-Translate(
-	BPositionIO *inSource,
-	const translator_info *inInfo,
+HEICTranslator::DerivedTranslate (
+	BPositionIO *source,
+	const translator_info *info,
 	BMessage * /*ioExtension*/,
-	uint32 outFormat,
-	BPositionIO *outDestination)
+	uint32 outType,
+	BPositionIO *target, int32 baseType)
 {
 	status_t ret_val = B_OK;
 
 	//	Check that we handle input and output types
-	if (inInfo->type != HEIC_FORMAT)
+	if (info->type != HEIC_IMAGE_FORMAT)
 		return B_NO_TRANSLATOR;
 
-	if (outFormat == 0)
-		outFormat = B_TRANSLATOR_BITMAP;
+	if (outType == 0)
+		outType = B_TRANSLATOR_BITMAP;
 
-	if (outFormat != B_TRANSLATOR_BITMAP)
+	if (outType != B_TRANSLATOR_BITMAP)
 		return B_NO_TRANSLATOR;
 
 	// Read input into memory
-	size_t fileSize = inSource->Seek(0, SEEK_END);
-	inSource->Seek(0, SEEK_SET);
+	size_t fileSize = source->Seek(0, SEEK_END);
+	source->Seek(0, SEEK_SET);
 	uint8_t *buffer = new uint8_t[fileSize];
-	if (inSource->Read(buffer, fileSize) != fileSize)
+	if (source->Read(buffer, fileSize) != fileSize)
 	{
 		delete[] buffer;
 		return B_ERROR;
@@ -176,10 +213,27 @@ Translate(
 	swap_data(B_UINT32_TYPE, &(bmp.dataSize), sizeof(uint32), B_SWAP_BENDIAN_TO_HOST);
 
 	// Write bitmap header & pixel data
-	if (outDestination->Write(&bmp, sizeof(TranslatorBitmap)) != sizeof(TranslatorBitmap) || outDestination->Write(bitmap->Bits(), bitmap->BitsLength()) != bitmap->BitsLength()) {
+	if (target->Write(&bmp, sizeof(TranslatorBitmap)) != sizeof(TranslatorBitmap) || target->Write(bitmap->Bits(), bitmap->BitsLength()) != bitmap->BitsLength()) {
 		ret_val = B_ERROR;
 	}
 
 	delete bitmap;
 	return ret_val;
+}
+
+
+BView *
+HEICTranslator::NewConfigView(TranslatorSettings *settings)
+{
+	return new ConfigView();
+}
+
+
+BTranslator *
+make_nth_translator(int32 n, image_id you, uint32 flags, ...)
+{
+	if (n != 0)
+		return NULL;
+
+	return new HEICTranslator();
 }
