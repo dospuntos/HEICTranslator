@@ -40,7 +40,7 @@ ConfigView::ConfigView(uint32 flags)
 	BStringView *versionView = new BStringView("version", version);
 
 	BStringView *copyrightView = new BStringView("copyright",
-		B_UTF8_COPYRIGHT "2025 Haiku Inc.");
+		B_UTF8_COPYRIGHT "2025 Johan Wagenheim");
 
 	BString openExrInfo = B_TRANSLATE("Based on libheif %version%");
 	openExrInfo.ReplaceAll("%version%", heif_get_version());
@@ -48,10 +48,10 @@ ConfigView::ConfigView(uint32 flags)
 		openExrInfo.String());
 
 	BStringView *copyrightView3 = new BStringView("copyright3",
-		B_UTF8_COPYRIGHT "2002-2014 Industrial Light & Magic,");
+		"Based in part on code shared by Zenja at:");
 
 	BStringView *copyrightView4 = new BStringView("copyright4",
-		B_TRANSLATE("a division of Lucasfilm Entertainment Company Ltd"));
+		B_TRANSLATE("https://dev.haiku-os.org/ticket/14909#comment:5"));
 
 	// Build the layout
 	BLayoutBuilder::Group<>(this, B_VERTICAL, 0)

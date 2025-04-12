@@ -1,6 +1,6 @@
 /*
  * HEICMain.cpp – HEIC image translator for Haiku
- * Version 0.1.0 (March 31st, 2025)
+ * Version 0.2.0 (April 2025)
  *
  * Copyright (c) 2025 Johan Wagenheim <johan@dospuntos.no>
  *
@@ -13,7 +13,6 @@
 
 #include <Application.h>
 #include <Catalog.h>
-#include <Alert.h>
 
 #include "shared/TranslatorWindow.h"
 #include "HEICTranslator.h"
@@ -23,7 +22,6 @@
 
 int main()
 {
-	(new BAlert("Test", "Main", "OK"))->Go();
 	BApplication app("application/x-vnd.Haiku-HEICTranslator");
 	if (LaunchTranslatorWindow(new HEICTranslator,
 		B_TRANSLATE("HEIC Settings")) != B_OK)

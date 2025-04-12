@@ -19,7 +19,7 @@
 #include <SupportDefs.h>
 #include <TranslationDefs.h>
 
-#define HEIC_TRANSLATOR_VERSION B_TRANSLATION_MAKE_VERSION(0,1,0)
+#define HEIC_TRANSLATOR_VERSION B_TRANSLATION_MAKE_VERSION(0,2,0)
 #define HEIC_IMAGE_FORMAT	'HEIC'
 
 class HEICTranslator : public BaseTranslator {
