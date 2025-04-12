@@ -1,11 +1,12 @@
 /*
- *  HEICTranslator.cpp 0.1.0 (March 31st, 2025)
+ * HEICTranslator.cpp – HEIC image translator for Haiku
  *
- *  Translator add-on for HEIC images
- *  Written by Johan Wagenheim <johan@dospuntos.no>
- *  Based on source code from https://dev.haiku-os.org/ticket/14909#comment:5
-
- *  Public domain.
+ * Copyright (c) 2025 Johan Wagenheim <johan@dospuntos.no>
+ *
+ * Based in part on code shared by Zenja at:
+ * https://dev.haiku-os.org/ticket/14909#comment:5
+ *
+ * Distributed under the terms of the MIT License.
  */
 
 

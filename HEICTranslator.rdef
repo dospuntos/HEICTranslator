@@ -9,5 +9,5 @@ resource app_version {
 	internal = 0,
 
 	short_info = "0.1.0",
-	long_info  = "Haiku HEICTranslator Add-Ons"
+	long_info  = "Haiku HEICTranslator Add-On"
 };
