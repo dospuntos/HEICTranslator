@@ -1,0 +1,17 @@
+resource(0, "BEOS:TYPE") #'MIMS' "application/x-vnd.Be-meta-mime";
+
+resource(1, "META:TYPE") "image/heic";
+
+resource(2, "META:SNIFF_RULE") "0.80 [4](\"ftyp\")[8](\"heic\" | \"heif\" | \"heix\" | \"hevc\" | \"hevx\" | \"mif1\" | \"msf1\")";
+
+resource(3, "META:S:DESC") #'MSDC' "HEIC image";
+
+resource(4, "META:L:DESC") #'MSDC' "High-Efficiency Image File Format (HEIC)";
+
+resource(5, "META:PREF_APP") #'MIMS' "application/x-vnd.Haiku-ShowImage";
+
+resource(6, "META:EXTENS") message(234) {
+	"extensions" = "heic",
+	"extensions" = "heif",
+	"type" = "image/heic"
+};
