@@ -40,7 +40,7 @@ ConfigView::ConfigView(uint32 flags)
 	BStringView *versionView = new BStringView("version", version);
 
 	BStringView *copyrightView = new BStringView("copyright",
-		B_UTF8_COPYRIGHT "2025 Johan Wagenheim");
+		B_UTF8_COPYRIGHT "2025/2026 Johan Wagenheim");
 
 	BString openExrInfo = B_TRANSLATE("Based on libheif %version%");
 	openExrInfo.ReplaceAll("%version%", heif_get_version());

@@ -96,24 +96,31 @@ HEICTranslator::DerivedIdentify(
 
 	// Check for HEIC magic bytes
 	char magic[12];
-	ssize_t readSize = inSource->Read(magic, 12);
-	if (readSize < 12)
+	if (inSource->ReadAt(0, magic, sizeof(magic)) != (ssize_t)sizeof(magic))
 		return B_NO_TRANSLATOR;
 
-	// HEIC files start with ftypheic or ftyphevc
-	if (memcmp(magic + 4, "ftypheic", 8) == 0 || memcmp(magic + 4, "ftyphevc", 8) == 0) {
-		inFormat = &sInputFormats[0];
-		outInfo->type = inFormat->type;
-		outInfo->group = inFormat->group;
-		outInfo->quality = inFormat->quality;
-		outInfo->capability = inFormat->capability;
-		strcpy(outInfo->name, inFormat->name);
-		strcpy(outInfo->MIME, inFormat->MIME);
+	if (memcmp(magic + 4, "ftyp", 4) != 0)
+		return B_NO_TRANSLATOR;
 
-		return B_OK;
+	const char* brand = magic + 8;
+	if (memcmp(brand, "heic", 4) != 0
+		&& memcmp(brand, "heix", 4) != 0
+		&& memcmp(brand, "hevc", 4) != 0
+		&& memcmp(brand, "hevx", 4) != 0
+		&& memcmp(brand, "mif1", 4) != 0
+		&& memcmp(brand, "msf1", 4) != 0) {
+		return B_NO_TRANSLATOR;
 	}
 
-	return B_NO_TRANSLATOR;
+	inFormat = &sInputFormats[0];
+	outInfo->type = inFormat->type;
+	outInfo->group = inFormat->group;
+	outInfo->quality = inFormat->quality;
+	outInfo->capability = inFormat->capability;
+	strlcpy(outInfo->name, inFormat->name, sizeof(outInfo->name));
+	strlcpy(outInfo->MIME, inFormat->MIME, sizeof(outInfo->MIME));
+
+	return B_OK;
 }
 
 
